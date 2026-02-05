@@ -33,6 +33,7 @@ export function Dashboard() {
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [endDate, setEndDate] = useState('');
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [autoAssignEnabled, setAutoAssignEnabled] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -197,6 +198,24 @@ async function handleCreateEvent(e: React.FormEvent) {
           >
             Create Event
           </button>
+          
+
+<label className="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
+  <span>Auto Assign</span>
+
+  <input
+    type="checkbox"
+    className="peer sr-only"
+    onChange={(e) => console.log('Auto Assign:', e.target.checked)}
+  />
+
+  <div className="w-11 h-6 bg-gray-300 rounded-full relative transition peer-checked:bg-emerald-400">
+</div>
+
+</label>
+
+
+
 
             {matches.length > 0 && (
               <button

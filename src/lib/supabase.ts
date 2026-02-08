@@ -19,6 +19,8 @@ export interface Profile {
   interests: string[];
   phone: string;
   profile_image_url: string;
+  auto_assign_enabled: boolean;
+  last_auto_assign_run: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -75,6 +77,7 @@ export interface Application {
   profile_id: string;
   status: 'pending' | 'accepted' | 'rejected' | 'completed';
   message: string;
+  auto_assigned: boolean;
   applied_at: string;
   updated_at: string;
 }

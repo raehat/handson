@@ -39,6 +39,12 @@ export function Dashboard() {
     loadData();
   }, [profile]);
 
+  useEffect(() => {
+    if (profile) {
+      setAutoAssignEnabled(profile.auto_assign_enabled || false);
+    }
+  }, [profile]);
+
   async function loadData() {
     setLoading(true);
     try {
@@ -55,6 +61,39 @@ export function Dashboard() {
       console.error('Error loading data:', error);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleAutoAssignToggle(enabled: boolean) {
+    if (!profile) return;
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ auto_assign_enabled: enabled })
+        .eq('id', profile.id);
+
+      if (error) throw error;
+
+      setAutoAssignEnabled(enabled);
+
+      if (enabled) {
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+        await fetch(`${supabaseUrl}/functions/v1/auto-assign-matches`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${anonKey}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        loadData();
+      }
+    } catch (error) {
+      console.error('Error toggling auto-assign:', error);
+      alert('Failed to update auto-assign setting');
     }
   }
 
@@ -200,18 +239,19 @@ async function handleCreateEvent(e: React.FormEvent) {
           </button>
           
 
-<label className="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
+<label className="flex items-center gap-2 cursor-pointer text-sm font-medium text-gray-700">
   <span>Auto Assign</span>
-
-  <input
-    type="checkbox"
-    className="peer sr-only"
-    onChange={(e) => console.log('Auto Assign:', e.target.checked)}
-  />
-
-  <div className="w-11 h-6 bg-gray-300 rounded-full relative transition peer-checked:bg-emerald-400">
-</div>
-
+  <div className="relative">
+    <input
+      type="checkbox"
+      checked={autoAssignEnabled}
+      onChange={(e) => handleAutoAssignToggle(e.target.checked)}
+      className="sr-only peer"
+    />
+    <div className="w-11 h-6 bg-gray-300 rounded-full peer-checked:bg-emerald-600 transition-colors relative">
+      <div className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${autoAssignEnabled ? 'translate-x-5' : ''}`}></div>
+    </div>
+  </div>
 </label>
 
 
